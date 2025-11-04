@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Test toggle dark/light</title>
+<style>
+  /* reset minimal */
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Helvetica, Arial, sans-serif; background:#fff; color:#111; }
+
+  /* nav simple */
+  .navbar { display:flex; justify-content:flex-end; padding:1rem 1.5rem; }
+  .nav-links { list-style:none; margin:0; padding:0; display:flex; gap:1rem; align-items:center; }
+  .nav-links a { text-decoration:none; color:inherit; }
+
+  /* bouton toggle */
+  .toggle-btn {
+    background:none; border:0; padding:0; margin:0; cursor:pointer;
+    display:inline-flex; align-items:center; gap:.4rem;
+  }
+  .toggle-btn:focus { outline:2px solid #77a; outline-offset:3px; }
+
+  .icon { display:none; width:20px; height:20px; }
+  .icon.active { display:inline-block; }
+
+  /* main content to visualiser la couleur */
+  main { padding:2rem; max-width:60ch; }
+
+  /* dark mode */
+  body.dark-mode {
+    background:#0b0b0b;
+    color:#eee;
+  }
+  body.dark-mode a { color:#9be79b; } /* liens verts sur dark */
+  /* ensure nav/footer follow body color (no separate background) */
+  .navbar, footer { background: transparent; }
+
+  footer { display:flex; justify-content:space-between; padding:1rem 1.5rem; font-size:.9rem; }
+</style>
+</head>
+<body>
+  <nav class="navbar">
+    <ul class="nav-links">
+      <li>
+        <button id="light-dark-toggle" class="toggle-btn" aria-pressed="false" title="Basculer clair / sombre">
+          <!-- icône lune (représente 'sombre' ; affichée quand on est en mode clair) -->
+          <svg id="icon-dark" class="icon active" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+          <!-- icône soleil (représente 'clair' ; affichée quand on est en mode sombre) -->
+          <svg id="icon-light" class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M6.76 4.84l-1.8-1.79L3.17 5.85l1.79 1.8 1.8-1.81zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.04 2.05l1.79-1.8-1.79-1.79-1.8 1.79 1.8 1.8zM17 13h3v-2h-3v2zM12 7a5 5 0 100 10 5 5 0 000-10zm4.24 9.16l1.8 1.79 1.79-1.8-1.79-1.79-1.8 1.8zM4.22 18.36l1.79 1.8 1.8-1.8-1.8-1.79-1.79 1.79zM12 23h2v-3h-2v3z"/>
+          </svg>
+        </button>
+      </li>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="index2.html">Index</a></li>
+      <li><a href="recherches.html">Recherches</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h1>La désobéissance numérique c'est pas que pour les geeks</h1>
+    <p>Ce fichier sert à tester le toggle. Ouvre la console (F12) pour voir les logs d'initialisation et le clic.</p>
+  </main>
+
+  <footer>
+    <div><a href="https://www.hesge.ch/head/" target="_blank" rel="noopener">HEAD - Genève</a></div>
+    <div>Autrice : Tara Hächler&nbsp;&nbsp;2025</div>
+  </footer>
+
+<script>
+(function () {
+  console.log('[Toggle] script start');
+
+  const toggleBtn = document.getElementById('light-dark-toggle');
+  const iconDark = document.getElementById('icon-dark');
+  const iconLight = document.getElementById('icon-light');
+  const body = document.body;
+
+  console.log('[Toggle] elements:', { toggleBtn: !!toggleBtn, iconDark: !!iconDark, iconLight: !!iconLight });
+
+  if (!toggleBtn || !iconDark || !iconLight) {
+    console.error('[Toggle] element(s) manquant(s)', { toggleBtn, iconDark, iconLight });
+    return;
+  }
+
+  function applyMode(isDark) {
+    if (isDark) {
+      body.classList.add('dark-mode');
+      iconDark.classList.remove('active'); // on montre icône "soleil" (pour basculer vers clair)
+      iconLight.classList.add('active');
+      toggleBtn.setAttribute('aria-pressed', 'true');
+    } else {
+      body.classList.remove('dark-mode');
+      iconDark.classList.add('active'); // on montre icône "lune" (pour basculer vers sombre)
+      iconLight.classList.remove('active');
+      toggleBtn.setAttribute('aria-pressed', 'false');
+    }
+    try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) { console.warn('[Toggle] localStorage non accessible'); }
+    console.log('[Toggle] applyMode -> isDark =', isDark);
+  }
+
+  // Init : lecture du storage ou préférence système
+  let saved = null;
+  try { saved = localStorage.getItem('darkMode'); } catch(e) { /* ignore */ }
+
+  if (saved === '1' || saved === '0') {
+    applyMode(saved === '1');
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyMode(prefersDark);
+  }
+
+  // Click + keyboard accessible (espace/entrée)
+  toggleBtn.addEventListener('click', function (e) {
+    console.log('[Toggle] click event', e);
+    const isNowDark = !body.classList.contains('dark-mode');
+    applyMode(isNowDark);
+  });
+
+  toggleBtn.addEventListener('keydown', function (e) {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      const isNowDark = !body.classList.contains('dark-mode');
+      applyMode(isNowDark);
+    }
+  });
+
+  console.log('[Toggle] initialized');
+})();
+</script>
+</body>
+</html>
