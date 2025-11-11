@@ -91,6 +91,26 @@ h1 {
   text-decoration: underline;
 }
 
+a[href^="#_ftn"] {
+  text-decoration: none;
+  font-size: 0.75em;     /* plus petit */
+  vertical-align: super; /* en exposant */
+  color: green;           /* couleur discrète */
+  margin-left: 2px;
+}
+
+.toc a {
+  color: green;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+  object-fit: contain;
+}
+
 .download a:hover {
   text-decoration: underline;
 }
@@ -119,26 +139,6 @@ footer a:hover {
   text-decoration: underline;
 }
 
-/* Responsive : sur petits écrans, on recentre et on augmente la largeur pour être lisible */
-@media (max-width: 800px) {
-  main {
-    max-width: 94%;
-    margin: 1rem auto; /* recentre sur mobile */
-    padding: 0 1rem;
-  }
-
-  .nav-links { gap: 1rem; }
-
-    h1 { font-size: 2.5rem; }
-
-    footer { 
-        flex-direction: column; 
-        gap: 0.5rem; 
-        text-align: center;
-        font-size: small;
-    }
-}
-
 .dark-mode {
   background: #0b0b0b;
   color: #eee;
@@ -146,4 +146,42 @@ footer a:hover {
 
 .dark-mode a {
   color: #eee;
+}
+
+.bibliographie, 
+p {
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: normal;
+}
+
+/* Responsive : sur petits écrans, on recentre et on augmente la largeur pour être lisible */
+@media (max-width: 800px) {
+  /* tentative plus contraignante pour écraser d'autres règles */
+  main {
+    width: 95% !important;
+    max-width: none !important;
+    margin: 1rem auto !important;
+    padding: 0 1rem !important;
+    box-sizing: border-box;
+    flex: 0 0 auto !important;      /* empêche le shrink si parent est flex */
+    min-width: 0 !important;
+    align-self: stretch !important;
+  }
+
+  .nav-links { gap: 1rem; }
+
+  h1 { font-size: 2.5rem; }
+
+  img { max-width: 100%; height: auto;  display: block;
+  margin: 0.5rem auto;
+  object-fit: contain;}
+
+  footer { 
+    flex-direction: column; 
+    gap: 0.5rem; 
+    text-align: center;
+    font-size: small;
+  }
 }

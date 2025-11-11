@@ -44,3 +44,25 @@
     applyMode(isNowDark);
   });
 })();
+
+document.querySelectorAll('a[href^="#_ftn"]').forEach(link => {
+  // On parcourt tous les nœuds enfants du lien (textes et balises)
+  link.querySelectorAll('*').forEach(child => {
+    if (child.childNodes.length) {
+      child.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          node.nodeValue = node.nodeValue.replace(/[\[\]]/g, '');
+        }
+      });
+    }
+  });
+
+  // On traite aussi le texte directement dans le <a> (hors balises)
+  if (link.childNodes.length) {
+    link.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        node.nodeValue = node.nodeValue.replace(/[\[\]]/g, '');
+      }
+    });
+  }
+});
