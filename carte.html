@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>insolence.zip</title>
+  <link rel="stylesheet" href="style-carte.css" />
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+</head>
+<body>
+  <!-- Menu -->
+  <nav class="navbar">
+   <ul class="nav-links">
+  <li><a href="index.html">insolence.zip</a></li>
+  <li><a href="carte.html">carte</a></li>
+  <li>
+        <button id="light-dark-toggle" class="toggle-btn" aria-pressed="false" title="Basculer clair / sombre">
+          <img id="icon-dark" class="icon active" src="public/icons/dark.svg" alt="Activer mode sombre">
+          <img id="icon-light" class="icon" src="public/icons/light.svg" alt="Activer mode clair">
+        </button>
+  </li>
+</ul>
+  </nav>
+
+  <!-- Contenu principal -->
+  <main>
+  <div id="leftPanel" class="panel hidden">
+    <button id="closePanel" title="Fermer">✕</button>
+    <div id="projectDetail">
+      <!-- Contenu injecté par JS -->
+    </div>
+  </div>
+
+
+  <div id="mapContainer">
+    <div id="mapInner">
+        <object id="mapThin" type="image/svg+xml" data="public/images/carte/thin.svg" style="stroke-width: 2;"></object>
+        <object id="mapThick" type="image/svg+xml" data="public/images/carte/thick.svg"></object>
+
+      <!-- p5 créera un canvas ici (via parent) -->
+      <!-- marqueurs insérés ici par JS -->
+    </div>
+  </div>
+
+   <div id="topBar">
+    <div class="compass" id="drole">↑ Drôle</div>
+    <div class="compass" id="serieux">↓ Sérieux</div>
+    <div class="compass" id="individuel">← Individuel</div>
+    <div class="compass" id="participatif">→ Participatif</div>
+  </div>
+
+  <script src="app.js"></script>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-left">
+        <span>Mémoire de master en média design à la </span>
+      <a href="https://www.hesge.ch/head/" target="_blank">HEAD - Genève</a>
+    </div>
+    <div class="footer-right">
+      <span>Tara Hächler &emsp;</span>
+      <span>&emsp; 2025</span>
+    </div>
+  </footer>
+  <script src="src/script.js"></script>
+</body>
+</html>

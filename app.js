@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    Charger les projets depuis le CSV
 ----------------------------*/
 async function loadProjectsFromCSV() {
-  const response = await fetch('public/projets-app-carte.csv');
+  const response = await fetch('./public/projets-app-carte.csv');
   const csvText = await response.text();
 
   // découper lignes / colonnes
@@ -69,7 +69,7 @@ async function loadProjectsFromCSV() {
       url: obj['Url'] || '',
       file: obj['Fichier'] || '',
       desc: obj['Description'] || '',
-      img: `public/images/projets/${obj['Fichier']}` // chemin relatif vers le dossier images
+      img: `./public/images/carte/projets/${obj['Fichier']}` // chemin relatif vers le dossier images
     };
   });
 }
@@ -382,79 +382,6 @@ function setupPanZoom() {
     });
   });
 }
-
-
-
-
-
-/* ---------------------------
-   p5: background pattern + troll image qui apparait au grand dézoom
-----------------------------*/
-/* function setupP5Canvas() {
-  // instance mode p5 pour ne pas polluer global
-  const sketch = (p) => {
-    let imgTroll = null;
-    p.setup = () => {
-      p.createCanvas(WORLD_W, WORLD_H).parent(mapInner);
-      p.noLoop(); // on redessine à la demande (sur zoom)
-      p.noiseSeed(42);
-      // charger image troll (exemple) — tu peux remplacer par ton asset
-      imgTroll = p.loadImage('https://images.pexels.com/photos/1693742/pexels-photo-1693742.jpeg?auto=compress&cs=tinysrgb&w=800'); // placeholder
-      // exposer fonction de redraw au monde (appelé après zoom)
-      window.redrawP5 = () => p.redraw();
-      window.currentZoom = scale; // initial
-      p.redraw();
-    };
-
-    p.draw = () => {
-      p.clear();
-      // background subtle
-      p.background(18, 20, 26);
-
-      // paramètres dépendants du zoom
-      const z = window.currentZoom || 1;
-      // stroke poids inversement proportionnel au zoom (ex: zoom petit -> gros traits)
-      const baseStroke = p.map(z, MIN_SCALE, MAX_SCALE, 6.0, 0.4, true);
-
-      // dessiner motifs de lignes (type "routes / pattern")
-      p.stroke(200, 200, 200, 60);
-      p.noFill();
-
-      // grid de courbes basées sur noise
-      const rows = 26;
-      for (let r = 0; r < rows; r++) {
-        const y = p.map(r, 0, rows - 1, 0, WORLD_H);
-        p.strokeWeight(baseStroke * p.map(r, 0, rows - 1, 0.6, 1.4));
-        p.beginShape();
-        for (let x = 0; x <= WORLD_W; x += 18) {
-          const n = p.noise(x * 0.002, r * 0.12);
-          const yy = y + p.map(n, 0, 1, -150, 150);
-          p.curveVertex(x, yy);
-        }
-        p.endShape();
-      }
-
-      // si on est suffisamment dézoomé (scale petit), faire apparaitre l'image troll très subtilement
-      // plus on dézoome (scale -> MIN_SCALE), plus opacity augmente
-      const revealThreshold = 0.6; // commence à apparaitre ici
-      let opacity = 0;
-      if (z < revealThreshold) {
-        opacity = p.map(z, revealThreshold, MIN_SCALE, 0, 1, true);
-      }
-      if (imgTroll && opacity > 0.02) {
-        p.push();
-        p.tint(255, 255 * opacity * 0.9);
-        // centrer l'image sur la toile et l'afficher grande
-        const iw = WORLD_W * 0.98;
-        const ih = WORLD_H * 0.98;
-        p.image(imgTroll, (WORLD_W - iw)/2, (WORLD_H - ih)/2, iw, ih);
-        p.pop();
-      }
-    };
-  };
-
-  new p5(sketch);
-} */
 
 /* ---------------------------
    petites utilitaires
