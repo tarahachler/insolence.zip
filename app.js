@@ -388,3 +388,68 @@ function setupPanZoom() {
 ----------------------------*/
 function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+// === TOUCH EVENTS pour mobile ===
+let lastTouchDistance = 0;
+let isTouchDragging = false;
+let touchStartX = 0;
+let touchStartY = 0;
+
+mapContainer.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) {
+    // Pan à un doigt
+    isTouchDragging = true;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    startOffsetX = offsetX;
+    startOffsetY = offsetY;
+  } else if (e.touches.length === 2) {
+    // Pinch à deux doigts
+    isTouchDragging = false; // on bloque le pan pendant le pinch
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    lastTouchDistance = Math.hypot(dx, dy);
+  }
+});
+
+mapContainer.addEventListener('touchmove', (e) => {
+  e.preventDefault(); // bloque le scroll natif
+
+  if (e.touches.length === 1 && isTouchDragging) {
+    // Pan à un doigt
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    offsetX = startOffsetX + dx;
+    offsetY = startOffsetY + dy;
+    applyTransform();
+  } else if (e.touches.length === 2) {
+    // Pinch zoom
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const newDist = Math.hypot(dx, dy);
+    if (!lastTouchDistance) lastTouchDistance = newDist;
+
+    const zoomFactor = newDist / lastTouchDistance;
+    let newScale = scale * zoomFactor;
+    newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, newScale));
+
+    // centre du pinch
+    const rect = mapContainer.getBoundingClientRect();
+    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+    const dxCenter = cx - offsetX;
+    const dyCenter = cy - offsetY;
+
+    offsetX = cx - (dxCenter * newScale / scale);
+    offsetY = cy - (dyCenter * newScale / scale);
+
+    scale = newScale;
+    applyTransform();
+    lastTouchDistance = newDist;
+  }
+}, { passive: false });
+
+mapContainer.addEventListener('touchend', () => {
+  isTouchDragging = false;
+  lastTouchDistance = 0;
+});
