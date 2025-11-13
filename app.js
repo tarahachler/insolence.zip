@@ -381,14 +381,7 @@ function setupPanZoom() {
       applyTransform();
     });
   });
-}
-
-/* ---------------------------
-   petites utilitaires
-----------------------------*/
-function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-// === TOUCH EVENTS pour mobile ===
+  // === TOUCH EVENTS pour mobile ===
 let lastTouchDistance = 0;
 let isTouchDragging = false;
 let touchStartX = 0;
@@ -453,3 +446,10 @@ mapContainer.addEventListener('touchend', () => {
   isTouchDragging = false;
   lastTouchDistance = 0;
 });
+}
+
+/* ---------------------------
+   petites utilitaires
+----------------------------*/
+function escapeHtml(s){ return (''+s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
