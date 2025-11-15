@@ -66,3 +66,33 @@ document.querySelectorAll('a[href^="#_ftn"]').forEach(link => {
     });
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const banner = document.getElementById("cookieBanner");
+  const acceptBtn = document.getElementById("acceptCookies");
+  const refuseBtn = document.getElementById("refuseCookies");
+
+  // Vérifie si la bannière a déjà été affichée
+  const consentGiven = localStorage.getItem("cookieConsent");
+
+  if (!consentGiven) {
+    banner.classList.remove("hidden");
+  }
+
+  acceptBtn.addEventListener("click", () => {
+    localStorage.setItem("cookieConsent", "accepted");
+    banner.classList.add("hidden");
+  });
+
+  refuseBtn.addEventListener("click", () => {
+    localStorage.setItem("cookieConsent", "refused");
+    window.location.href = "refus.html"; // 👉 redirige vers ta page personnalisée
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const boutonAccepterPageRefus = document.getElementById("acceptCookies");
+  boutonAccepterPageRefus.addEventListener("click", () => {
+    window.location.href = "index.html"; // 👉 redirige vers la page principale
+  });
+});

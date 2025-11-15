@@ -1,0 +1,27 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tarahachler/insolence.zip.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tarahachler/insolence.zip/issues"
+  },
+  "homepage": "https://github.com/tarahachler/insolence.zip#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "scripts": {
+  "start": "node server.js"
+}
+}
