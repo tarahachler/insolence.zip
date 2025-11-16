@@ -31,8 +31,8 @@ let localUser = { id: null, name: null };
 // localStorage uniquement pour stocker le pseudo généré
 const LS_KEY_USER = 'proto_user';
 
-const API_BASE = 'http://localhost:3000';
-// const API_BASE = 'https://insolence-zip.onrender.com';
+//const API_BASE = 'http://localhost:3000';
+const API_BASE = 'https://insolence-zip.onrender.com';
 const COMMENTS_URL = `${API_BASE}/api/comments`;
 const VOTES_URL = `${API_BASE}/api/votes`;
 
