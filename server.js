@@ -28,6 +28,9 @@ app.use(express.static(__dirname));
 // chemins vers les fichiers JSON
 const COMMENTS_PATH = path.join(__dirname, 'public', 'comments.json');
 const VOTES_PATH = path.join(__dirname, 'public', 'votes.json');
+const PROJECTS_PATH = path.join(__dirname, 'public', 'user-projects.json');
+
+
 
 // util pour lire un JSON
 async function readJson(filePath) {
@@ -120,6 +123,122 @@ app.post('/api/votes', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erreur écriture votes.json' });
+  }
+});
+
+/* ---- USER PROJECTS ---- */
+
+// récupérer tous les projets utilisateurs
+app.get('/api/projects', async (req, res) => {
+  try {
+    const projects = await readJson(PROJECTS_PATH);
+    res.json(projects);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lecture user-projects.json' });
+  }
+});
+
+// ajouter un projet utilisateur
+app.post('/api/projects', async (req, res) => {
+  const {
+    title,
+    auteur,
+    desc,
+    url,
+    imgUrl,
+    humour,
+    participatif
+  } = req.body;
+
+  if (!title || !imgUrl) {
+    return res.status(400).json({ error: 'title et imgUrl sont requis' });
+  }
+
+  const id = 'user_' + Date.now();
+
+  const baseHumour = Number(humour) || 0;
+  const baseParticip = Number(participatif) || 0;
+
+  const newProject = {
+    id,
+    title,
+    baseHumour,
+    baseParticip,
+    avgHumour: baseHumour,
+    avgParticip: baseParticip,
+    auteur: auteur || '',
+    url: url || '',
+    file: '',
+    desc: desc || '',
+    img: imgUrl  // 🔥 image qui vient de l’URL fournie par la personne
+  };
+
+  try {
+    const projects = await readJson(PROJECTS_PATH);
+    projects.push(newProject);
+    await writeJson(PROJECTS_PATH, projects);
+    res.status(201).json(newProject);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur écriture user-projects.json' });
+  }
+});
+
+/* ---- USER PROJECTS ---- */
+
+app.get('/api/projects', async (req, res) => {
+  try {
+    const projects = await readJson(PROJECTS_PATH);
+    res.json(projects);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lecture user-projects.json' });
+  }
+});
+app.post('/api/projects', async (req, res) => {
+  const {
+    title,
+    auteur,
+    desc,
+    url,
+    imgUrl,
+    humour,
+    participatif
+  } = req.body;
+
+  if (!title || imgUrl == null) {
+    return res.status(400).json({ error: 'title et imgUrl sont requis' });
+  }
+
+  // id unique
+  const id = 'user_' + Date.now();
+
+  const baseHumour = Number(humour) || 0;
+  const baseParticip = Number(participatif) || 0;
+
+  const newProject = {
+    id,
+    title,
+    baseHumour,
+    baseParticip,
+    avgHumour: baseHumour,
+    avgParticip: baseParticip,
+    auteur: auteur || '',
+    url: url || '',
+    file: '', // pas de fichier local
+    desc: desc || '',
+    img: imgUrl // <= l’image vient de l’URL fournie par l’utilisateur
+  };
+
+  try {
+    const projects = await readJson(PROJECTS_PATH);
+    projects.push(newProject);
+    await writeJson(PROJECTS_PATH, projects);
+    res.status(201).json(newProject);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur écriture user-projects.json' });
   }
 });
 

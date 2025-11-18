@@ -50,13 +50,56 @@
     <div class="compass" id="participatif">→ Participatif</div>
   </div>
 
+    <!-- Bouton + pour ajouter un projet -->
+  <button id="addProjectBtn" class="fab-add-project" title="Ajouter un projet">+</button>
+
+  <!-- Panneau de formulaire -->
+  <div id="addProjectPanel" class="add-project-panel hidden">
+    <form id="addProjectForm">
+      <h3 class="titrePanelAjouter">Ajouter un projet</h3>
+      <label>Titre*<br>
+        <input type="text" name="title" required>
+      </label>
+
+      <label>Auteur·ice(s)<br>
+        <input type="text" name="auteur">
+      </label>
+
+      <label>Description<br>
+        <textarea name="desc" rows="3"></textarea>
+      </label>
+
+      <label>URL du projet (site, vidéo, etc.)<br>
+        <input type="url" name="url">
+      </label>
+
+      <label>URL de l’image*<br>
+        <input type="url" name="imgUrl" required placeholder="https://...">
+      </label>
+
+      <label>Humour (0–10)<br>
+        <input type="number" name="humour" min="0" max="10" value="5">
+      </label>
+
+      <label>Participation (0–10)<br>
+        <input type="number" name="participatif" min="0" max="10" value="5">
+      </label>
+
+      <div class="add-project-actions">
+        <button type="button" id="cancelAddProject">Annuler</button>
+        <button type="submit">Ajouter</button>
+      </div>
+    </form>
+  </div>
+
+
   <script src="app.js"></script>
   </main>
 
   <!-- Footer -->
   <footer>
     <div class="footer-left">
-        <span>Mémoire de master en média design à la </span>
+        <span>Mémoire de master en Media Design à la </span>
       <a href="https://www.hesge.ch/head/" target="_blank">HEAD - Genève</a>
     </div>
     <div class="footer-right">

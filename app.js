@@ -18,6 +18,8 @@ let projects = [];
 let votesData = [];     // [{ projectId, pseudo, humour, participatif }]
 let commentsData = [];  // [{ projectId, pseudo, commentaire, date }]
 
+let coordCount = {};
+
 // état du viewport
 let scale = 1, offsetX = 0, offsetY = 0;
 let isDragging = false, dragStartX = 0, dragStartY = 0, startOffsetX = 0, startOffsetY = 0;
@@ -35,6 +37,8 @@ const LS_KEY_USER = 'proto_user';
 const API_BASE = 'https://insolence-zip.onrender.com';
 const COMMENTS_URL = `${API_BASE}/api/comments`;
 const VOTES_URL = `${API_BASE}/api/votes`;
+const PROJECTS_URL = `${API_BASE}/api/projects`;
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   mapContainer = document.getElementById('mapContainer');
@@ -48,16 +52,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 1) CSV
   await loadProjectsFromCSV();
-  // 2) JSON votes + commentaires
+  // 1bis) Projets utilisateurs
+  await loadUserProjectsFromServer();
+  // 2) Votes & commentaires
   await loadVotesFromServer();
   await loadCommentsFromServer();
-  // 3) Calcul des moyennes
+  // 3) Moyennes
   recomputeProjectStats();
-  // 4) Création des marqueurs
+  // 4) Marqueurs
   createMarkers();
 
   closePanelBtn.addEventListener('click', () => leftPanel.classList.add('hidden'));
+
+  // Initialisation du bouton + et du formulaire (on le fait plus bas)
+  initAddProjectUI();
 });
+
 
 /* ---------------------------
    Charger les projets depuis le CSV
@@ -91,6 +101,18 @@ async function loadProjectsFromCSV() {
       img: `./public/images/carte/projets/${obj['Fichier']}`
     };
   });
+}
+async function loadUserProjectsFromServer() {
+  try {
+    const res = await fetch(PROJECTS_URL);
+    if (!res.ok) throw new Error('Erreur chargement user projects');
+    const userProjects = await res.json();
+    if (!Array.isArray(userProjects)) return;
+    // On les ajoute au tableau global "projects"
+    userProjects.forEach(p => projects.push(p));
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 /* ---------------------------
@@ -158,45 +180,49 @@ function coordToPx(humour, particip) {
    Créer marqueurs DOM
 ----------------------------*/
 function createMarkers() {
-  const coordCount = {}; // clé = `${humour}_${particip}`, valeur = nb de projets déjà placés
-
+  coordCount = {};
   for (const p of projects) {
-    const pos = coordToPx(p.avgHumour, p.avgParticip);
-
-    const key = `${Math.round(p.avgHumour)}_${Math.round(p.avgParticip)}`;
-    const stackIndex = coordCount[key] || 0;
-    coordCount[key] = stackIndex + 1;
-
-    const yOffset = stackIndex * 56;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'marker-wrap';
-    wrap.style.position = 'absolute';
-    wrap.style.left = `${pos.x - 28}px`;
-    wrap.style.top = `${pos.y - 28 + yOffset}px`;
-
-    const el = document.createElement('div');
-    el.className = 'marker';
-
-    const img = document.createElement('img');
-    img.src = p.img;
-    img.alt = p.title;
-    el.appendChild(img);
-
-    const label = document.createElement('div');
-    label.className = 'label';
-    label.textContent = p.title;
-
-    wrap.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openDetail(p);
-    });
-
-    wrap.appendChild(el);
-    wrap.appendChild(label);
-    mapInner.appendChild(wrap);
+    createMarkerForProject(p);
   }
 }
+
+function createMarkerForProject(p) {
+  const pos = coordToPx(p.avgHumour, p.avgParticip);
+
+  const key = `${Math.round(p.avgHumour)}_${Math.round(p.avgParticip)}`;
+  const stackIndex = coordCount[key] || 0;
+  coordCount[key] = stackIndex + 1;
+
+  const yOffset = stackIndex * 56;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'marker-wrap';
+  wrap.style.position = 'absolute';
+  wrap.style.left = `${pos.x - 28}px`;
+  wrap.style.top = `${pos.y - 28 + yOffset}px`;
+
+  const el = document.createElement('div');
+  el.className = 'marker';
+
+  const img = document.createElement('img');
+  img.src = p.img;
+  img.alt = p.title;
+  el.appendChild(img);
+
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = p.title;
+
+  wrap.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openDetail(p);
+  });
+
+  wrap.appendChild(el);
+  wrap.appendChild(label);
+  mapInner.appendChild(wrap);
+}
+
 
 /* ---------------------------
    Panneau détail
@@ -561,6 +587,79 @@ function setupPanZoom() {
     lastTouchDistance = 0;
   });
 }
+
+function initAddProjectUI() {
+  const btn = document.getElementById('addProjectBtn');
+  const panel = document.getElementById('addProjectPanel');
+  const form = document.getElementById('addProjectForm');
+  const cancelBtn = document.getElementById('cancelAddProject');
+
+  if (!btn || !panel || !form || !cancelBtn) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    panel.classList.toggle('hidden');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    panel.classList.add('hidden');
+  });
+
+  // fermer si on clique sur la carte ou ailleurs
+  document.addEventListener('click', (e) => {
+    if (!panel.contains(e.target) && e.target !== btn) {
+      panel.classList.add('hidden');
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const payload = {
+      title: formData.get('title'),
+      auteur: formData.get('auteur'),
+      desc: formData.get('desc'),
+      url: formData.get('url'),
+      imgUrl: formData.get('imgUrl'),
+      humour: formData.get('humour'),
+      participatif: formData.get('participatif')
+    };
+
+    try {
+      const res = await fetch(PROJECTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        console.error(await res.text());
+        alert('Erreur lors de l’enregistrement du projet.');
+        return;
+      }
+
+      const newProject = await res.json();
+
+      // On l’ajoute au tableau global "projects"
+      projects.push(newProject);
+
+      // Le marker utilisera avgHumour/avgParticip (déjà dans newProject)
+      createMarkerForProject(newProject);
+
+      panel.classList.add('hidden');
+      form.reset();
+
+      // Optionnel : ouvrir directement la fiche détail
+      openDetail(newProject);
+
+    } catch (err) {
+      console.error(err);
+      alert('Erreur réseau lors de l’envoi du projet.');
+    }
+  });
+}
+
 
 /* ---------------------------
    petites utilitaires

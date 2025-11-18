@@ -354,3 +354,69 @@ textarea {
 .comment small {
   color: #027b8b
 }
+
+.fab-add-project {
+  position: fixed;
+  right: 24px;
+  bottom: 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  z-index: 1000;
+}
+
+.add-project-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 114px;
+  width: 280px;
+  max-width: 90vw;
+  background: var(--bg, #fff);
+  color: var(--text, #000);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  padding: 12px 14px;
+  z-index: 1000;
+}
+
+.add-project-panel.hidden {
+  display: none;
+}
+
+.add-project-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-project-panel input,
+.add-project-panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.add-project-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+#cancelAddProject{
+  background: #ffffff;
+  color: #8d8d8d;
+  border: 1px solid #8d8d8d;
+}
+
+.titrePanelAjouter {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  margin-top: -5px;
+  color: #027b8b;
+}
