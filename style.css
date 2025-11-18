@@ -6,6 +6,8 @@ body {
   margin: 0;
   font-family: Helvetica, Arial, sans-serif;
   line-height: 1.6;
+    hyphens: auto;
+  overflow-wrap: break-word;
   background: #fff;
   color: #222;
 }
@@ -106,6 +108,7 @@ a[href^="#_ftn"] {
 img {
   max-width: 100%;
   height: auto;
+  max-height: 700px;
   display: block;
   margin: 1rem auto;
   object-fit: contain;
@@ -269,4 +272,15 @@ p {
   border: none;
   cursor: pointer;
   font-weight: 550;
+}
+
+.text-memoire-petit {
+    font-size: 0.85rem;
+    margin-top: -10px;
+}
+
+p {
+  hyphens: auto;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
