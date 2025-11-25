@@ -39,7 +39,9 @@ const COMMENTS_URL = `${API_BASE}/api/comments`;
 const VOTES_URL = `${API_BASE}/api/votes`;
 const PROJECTS_URL = `${API_BASE}/api/projects`;
 
-
+/* ---------------------------
+   Initialisation DOM
+----------------------------*/
 document.addEventListener('DOMContentLoaded', async () => {
   mapContainer = document.getElementById('mapContainer');
   mapInner = document.getElementById('mapInner');
@@ -50,24 +52,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   initLocalUser();
   setupPanZoom();
 
-  // 1) CSV
+  // 1) Charger les projets (CSV + projets utilisateurs)
   await loadProjectsFromCSV();
-  // 1bis) Projets utilisateurs
   await loadUserProjectsFromServer();
-  // 2) Votes & commentaires
-  await loadVotesFromServer();
-  await loadCommentsFromServer();
-  // 3) Moyennes
-  recomputeProjectStats();
-  // 4) Marqueurs
+
+  // 2) Afficher tout de suite les marqueurs avec les valeurs de base
+  recomputeProjectStats();   // votesData / commentsData sont encore vides
   createMarkers();
 
   closePanelBtn.addEventListener('click', () => leftPanel.classList.add('hidden'));
 
-  // Initialisation du bouton + et du formulaire (on le fait plus bas)
+  // 3) Lancer le chargement des votes + commentaires en arrière-plan
+  Promise.all([
+    loadVotesFromServer(),
+    loadCommentsFromServer()
+  ])
+    .then(() => {
+      // Recalculer les moyennes avec les votes récupérés
+      recomputeProjectStats();
+      // Reconstruire tous les marqueurs pour garder le bon empilement (coordCount / yOffset)
+      clearMarkers();
+      createMarkers();
+    })
+    .catch(err => {
+      console.error('Erreur chargement votes/commentaires', err);
+    });
+
+  // 4) Initialisation du bouton + et du formulaire
   initAddProjectUI();
 });
-
 
 /* ---------------------------
    Charger les projets depuis le CSV
@@ -102,6 +115,7 @@ async function loadProjectsFromCSV() {
     };
   });
 }
+
 async function loadUserProjectsFromServer() {
   try {
     const res = await fetch(PROJECTS_URL);
@@ -177,13 +191,17 @@ function coordToPx(humour, particip) {
 }
 
 /* ---------------------------
-   Créer marqueurs DOM
+   Créer / nettoyer les marqueurs DOM
 ----------------------------*/
 function createMarkers() {
   coordCount = {};
   for (const p of projects) {
     createMarkerForProject(p);
   }
+}
+
+function clearMarkers() {
+  document.querySelectorAll('.marker-wrap').forEach(el => el.remove());
 }
 
 function createMarkerForProject(p) {
@@ -222,7 +240,6 @@ function createMarkerForProject(p) {
   wrap.appendChild(label);
   mapInner.appendChild(wrap);
 }
-
 
 /* ---------------------------
    Panneau détail
@@ -315,16 +332,24 @@ function renderDetail(proj) {
     });
   });
 
+  // Enregistrement du vote : on reconstruit tous les marqueurs pour garder le bon empilement
   document.getElementById('submitVote').addEventListener('click', async () => {
     const newHum = Number(sliderHum.value);
     const newPar = Number(sliderPart.value);
     await saveVote(proj.id, localUser.name, newHum, newPar);
+
+    // Recalculer les moyennes
     recomputeProjectStats();
-    repositionMarker(proj.id);
-    // mettre à jour affichage (nouvelle moyenne)
+
+    // Reconstruire tous les marqueurs (coordCount + yOffset cohérents)
+    clearMarkers();
+    createMarkers();
+
+    // mettre à jour affichage (nouvelle moyenne) dans le panneau détail
     const updatedProj = projects.find(p => p.id === proj.id) || proj;
     document.getElementById('avg-humour').textContent = updatedProj.avgHumour.toFixed(1);
     document.getElementById('avg-part').textContent = updatedProj.avgParticip.toFixed(1);
+
     alert('Ton vote a été enregistré.');
   });
 
@@ -336,25 +361,8 @@ function renderDetail(proj) {
   });
 }
 
-/* positionne la bulle si les coordonnées changent (via moyenne) */
-function repositionMarker(projectId) {
-  const idx = projects.findIndex(p => p.id === projectId);
-  if (idx === -1) return;
-  const proj = projects[idx];
-
-  const pos = coordToPx(proj.avgHumour, proj.avgParticip);
-  const wrapEls = document.querySelectorAll('.marker-wrap');
-  const wrap = wrapEls[idx];
-  if (!wrap) return;
-
-  // on ne gère pas ici le décalage vertical de "pile" (pour rester simple)
-  wrap.style.left = `${pos.x - 28}px`;
-  wrap.style.top = `${pos.y - 28}px`;
-}
-
 /* ---------------------------
    Backend helpers (votes & commentaires)
-   À adapter selon tes routes backend réelles
 ----------------------------*/
 async function saveVote(projectId, pseudo, humour, participatif) {
   const existingIndex = votesData.findIndex(v => v.projectId === projectId && v.pseudo === pseudo);
@@ -398,7 +406,6 @@ async function postComment(projectId, pseudo, text) {
     console.error('Erreur lors de l’enregistrement du commentaire côté serveur :', e);
   }
 }
-
 
 /* ---------------------------
    localStorage: user (pseudo uniquement)
@@ -588,6 +595,9 @@ function setupPanZoom() {
   });
 }
 
+/* ---------------------------
+   Formulaire ajout de projet
+----------------------------*/
 function initAddProjectUI() {
   const btn = document.getElementById('addProjectBtn');
   const panel = document.getElementById('addProjectPanel');
@@ -659,7 +669,6 @@ function initAddProjectUI() {
     }
   });
 }
-
 
 /* ---------------------------
    petites utilitaires
